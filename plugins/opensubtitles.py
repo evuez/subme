@@ -22,10 +22,26 @@ class Opensubtitles(object):
 	def search(self, filepath):
 		return self.proxy.SearchSubtitles(self.token, (
 			{'moviehash': os_hash(filepath)},
-			{'limit': 50})
-		)
+			{'limit': 500})
+		)['data']
 
 
 
 def search(filepath):
-	return Opensubtitles().search(filepath)
+	"""
+	Return a list of dicts of the form
+	[{
+		'link': <subtitle download link>,
+		'language': <language>,
+		'format': <subtitle format>,
+		'rating': <subtitle rating>
+	},
+	...]
+	"""
+	return [{
+			'link': s['SubDownloadLink'],
+			'language': s['LanguageName'],
+			'format': s['SubFormat'],
+			'rating': s['SubRating'],
+		} for s in Opensubtitles().search(filepath)
+	]

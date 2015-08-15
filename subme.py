@@ -4,4 +4,6 @@ PLUGINS = {'opensubtitles'}
 
 from plugins import opensubtitles
 
-print(opensubtitles.search('test/ins.mp4'))
+res = opensubtitles.search('test/ins.mp4')
+print(len(res))
+print(sorted(res, key=lambda k: k['rating']))
