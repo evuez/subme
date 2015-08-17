@@ -1,12 +1,14 @@
 from importlib import import_module
 from os import path
+from urllib.request import Request
+from urllib.request import urlopen
 from plugins import logger
 from plugins import NoSubsError
 
 
 PLUGINS = {'opensubtitles'}
 
-media = 'subme.py'
+media = 'test/bkd.avi'
 
 def check_path(media):
 	if not path.exists(media):
@@ -36,6 +38,10 @@ def search(media):
 
 def download(media, subs):
 	logger.info("Downloading best subtitle...")
+	url = subs[0]['url']
+	with open('tmp/sub.zip', 'wb') as subfile:
+		subfile.write(urlopen(Request(url)).read())
+
 
 
 check_path(media)

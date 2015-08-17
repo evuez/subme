@@ -31,7 +31,7 @@ def search(filepath):
 	"""
 	Return a list of dicts of the form
 	[{
-		'link': <subtitle download link>,
+		'url': <subtitle download url>,
 		'language': <language>,
 		'format': <subtitle format>,
 		'rating': <subtitle rating>
@@ -40,7 +40,7 @@ def search(filepath):
 	"""
 	try:
 		return [{
-				'link': s['SubDownloadLink'],
+				'url': s['ZipDownloadLink'],
 				'language': s['LanguageName'],
 				'format': s['SubFormat'],
 				'rating': s['SubRating'],
