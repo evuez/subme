@@ -1,3 +1,4 @@
+from . import NoSubsError
 from . import os_hash
 import xmlrpc.client
 
@@ -16,7 +17,7 @@ class Opensubtitles(object):
 			None,
 			None,
 			'en',
-			'OSTestUserAgent'
+			'evuez'
 		)['token']
 
 	def search(self, filepath):
@@ -24,7 +25,6 @@ class Opensubtitles(object):
 			{'moviehash': os_hash(filepath)},
 			{'limit': 500})
 		)['data']
-
 
 
 def search(filepath):
@@ -38,10 +38,13 @@ def search(filepath):
 	},
 	...]
 	"""
-	return [{
-			'link': s['SubDownloadLink'],
-			'language': s['LanguageName'],
-			'format': s['SubFormat'],
-			'rating': s['SubRating'],
-		} for s in Opensubtitles().search(filepath)
-	]
+	try:
+		return [{
+				'link': s['SubDownloadLink'],
+				'language': s['LanguageName'],
+				'format': s['SubFormat'],
+				'rating': s['SubRating'],
+			} for s in Opensubtitles().search(filepath)
+		]
+	except KeyError:
+		raise NoSubsError

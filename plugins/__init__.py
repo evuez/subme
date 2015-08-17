@@ -1,6 +1,16 @@
+import logging
 from struct import calcsize
 from struct import unpack
 from os.path import getsize
+
+
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+
+
+class NoSubsError(Exception):
+	pass
+
 
 def os_hash(filepath):
 	"""
