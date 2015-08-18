@@ -3,6 +3,7 @@ from shutil import move
 from os.path import join
 from os.path import splitext
 from os.path import dirname
+from os.path import basename
 from hashlib import md5
 from zipfile import ZipFile
 from urllib.request import Request
@@ -17,16 +18,20 @@ media = 'test/bkd.avi'
 
 
 class DownloadError(Exception):
-	pass
+	def __init__(self, message="Download error"):
+		super().__init__(message)
 
 class ExtractError(Exception):
-	pass
+	def __init__(self, message="Extract error"):
+		super().__init__(message)
 
 class MoveError(Exception):
-	pass
+	def __init__(self, message="Move error"):
+		super().__init__(message)
 
 class SubError(Exception):
-	pass
+	def __init__(self, message="Sub error"):
+		super().__init__(message)
 
 
 class Subme(object):
@@ -45,33 +50,38 @@ class Subme(object):
 				subpath = self._extract(subpath)
 				subpath = self._move(subpath, video)
 			except (DownloadError, ExtractError, MoveError) as e:
-				logger.debug(e)
+				logger.info(e)
 			else:
 				break
 		else:
 			raise SubError
 
 	def _download(self, suburl):
-		subpath = join(TMP, md5(suburl).hexdigest() + splitext(suburl)[1])
-		with open(subpath) as f:
-			f.write(urlopen(Request(url)).read())
+		request = urlopen(Request(suburl))
+		subpath = join(
+			self.TMP,
+			md5(suburl.encode('utf-8')).hexdigest() +
+			splitext(request.info().get_filename())[1]
+		)
+		with open(subpath, 'wb') as f:
+			f.write(request.read())
 		return subpath
 
 	def _extract(self, subpath):
 		"""
 		TODO: move "extractors" to a  subpackage for simpler extension
 		"""
-		if subpath.endswith(SUB_EXTENSIONS):
+		if subpath.endswith(self.SUB_EXTENSIONS):
 			return subpath
-		if not subpath.endswith(ZIP_EXTENSIONS):
+		if not subpath.endswith(self.ZIP_EXTENSIONS):
 			raise ExtractError
 		if subpath.endswith('zip'):
 			with ZipFile(subpath) as f:
-				subfile = next(
-					(s for s in f.namelist() if s.endswith(SUB_EXTENSIONS)),
-					None
-				)
-				return f.extract(subfile, TMP)
+				subfile = next((
+					s for s in f.namelist()
+					if s.endswith(self.SUB_EXTENSIONS)
+				), None)
+				return f.extract(subfile, self.TMP)
 		raise ExtractError
 
 	def _move(self, subpath, video):
@@ -82,8 +92,23 @@ class Subme(object):
 		move(subpath, _subpath)
 
 	def search(self, video):
-		pass
+		subs = []
+		for plugin in self.PLUGINS:
+			try:
+				subs += getattr(
+					import_module('plugins.{}'.format(plugin)),
+					'search'
+				)(video)
+			except NoSubsError:
+				pass
+		return sorted(subs, key=lambda k: k['rating'], reverse=True)
 
+	def teardown(self):
+		pass # empty tmp dir
+
+
+s = Subme()
+s.sub("test/bkd.avi")
 
 # def check_path(media):
 # 	if not path.exists(media):
