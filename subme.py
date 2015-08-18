@@ -2,6 +2,7 @@ from importlib import import_module
 from shutil import move
 from shutil import rmtree
 from os import makedirs
+from os import listdir
 from os.path import join
 from os.path import splitext
 from os.path import dirname
@@ -55,7 +56,10 @@ class Subme(object):
 		self.teardown()
 
 	def subdir(self, directory):
-		pass
+		for f in listdir(directory):
+			if not f.endswith(self.VIDEO_EXTENSIONS):
+				continue
+			self.subfile(join(directory, f))
 
 	def subfile(self, video):
 		subs = self.search(video)
@@ -125,5 +129,6 @@ class Subme(object):
 
 
 s = Subme()
-s.path = "test/bkd.avi"
+# s.path = "test/bkd.avi"
+s.path = "test/"
 s.start()
