@@ -6,17 +6,14 @@ from os.path import join
 from os.path import splitext
 from os.path import dirname
 from os.path import basename
+from os.path import isdir
+from os.path import exists
 from hashlib import md5
 from zipfile import ZipFile
 from urllib.request import Request
 from urllib.request import urlopen
 from plugins import logger
 from plugins import NoSubsError
-
-
-PLUGINS = {'opensubtitles'}
-
-media = 'test/bkd.avi'
 
 
 class DownloadError(Exception):
@@ -43,7 +40,24 @@ class Subme(object):
 	ZIP_EXTENSIONS = ('zip',)
 	TMP = 'tmp'
 
-	def sub(self, video):
+	def __init__(self, path_=None):
+		self.path = path_
+
+	def start(self):
+		if not exists(self.path):
+			raise SubError
+		if isdir(self.path):
+			self.subdir(self.path)
+		elif self.path.endswith(self.VIDEO_EXTENSIONS):
+			self.subfile(self.path)
+		else:
+			raise SubError
+		self.teardown()
+
+	def subdir(self, directory):
+		pass
+
+	def subfile(self, video):
 		subs = self.search(video)
 		subpath = None
 		for sub in subs:
@@ -111,5 +125,5 @@ class Subme(object):
 
 
 s = Subme()
-s.sub("test/bkd.avi")
-s.teardown()
+s.path = "test/bkd.avi"
+s.start()
