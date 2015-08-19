@@ -128,7 +128,16 @@ class Subme(object):
 		makedirs(self.TMP)
 
 
-s = Subme()
-# s.path = "test/bkd.avi"
-s.path = "test/"
-s.start()
+
+if __name__ == '__main__':
+	subme = Subme()
+
+	while True:
+		print("\n\n")
+		video_path = input("Drag and drop a file or a directory here: ")
+		subme.path = video_path.strip('\'"')
+
+		if not subme.path:
+			continue
+
+		subme.start()
