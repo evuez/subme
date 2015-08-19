@@ -10,7 +10,6 @@ from os.path import basename
 from os.path import isdir
 from os.path import exists
 from hashlib import md5
-from zipfile import ZipFile
 from urllib.request import Request
 from urllib.request import urlopen
 from plugins import logger
@@ -38,7 +37,6 @@ class Subme(object):
 	PLUGINS = {'opensubtitles'}
 	VIDEO_EXTENSIONS = ('avi', 'mp4', 'mkv',)
 	SUB_EXTENSIONS = ('srt',)
-	ZIP_EXTENSIONS = ('zip',)
 	TMP = 'tmp'
 
 	def __init__(self, path_=None, languages=None):
@@ -95,21 +93,16 @@ class Subme(object):
 		return subpath
 
 	def _extract(self, subpath):
-		"""
-		TODO: move "extractors" to a  subpackage for simpler extension
-		"""
+		import extractors
+
 		if subpath.endswith(self.SUB_EXTENSIONS):
 			return subpath
-		if not subpath.endswith(self.ZIP_EXTENSIONS):
+		if not subpath.endswith(tuple(extractors.EXTRACTORS.keys())):
 			raise ExtractError
-		if subpath.endswith('zip'):
-			with ZipFile(subpath) as f:
-				subfile = next((
-					s for s in f.namelist()
-					if s.endswith(self.SUB_EXTENSIONS)
-				), None)
-				return f.extract(subfile, self.TMP)
-		raise ExtractError
+		return getattr(
+			extractors,
+			extractors.EXTRACTORS[splitext(subpath)[1][1:]]
+		)(subpath)
 
 	def _move(self, subpath, video):
 		_subpath = join(
