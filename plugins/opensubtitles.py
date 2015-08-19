@@ -37,11 +37,13 @@ def search(filepath):
 		'rating': <subtitle rating>
 	},
 	...]
+	'language' must be a 2-letters code according to the ISO 639-1 or a
+	3-letters code (ISO 639-2).
 	"""
 	try:
 		return [{
 				'url': s['ZipDownloadLink'],
-				'language': s['LanguageName'],
+				'language': s['SubLanguageID'],
 				'format': s['SubFormat'],
 				'rating': s['SubRating'],
 			} for s in Opensubtitles().search(filepath)

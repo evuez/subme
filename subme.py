@@ -41,8 +41,15 @@ class Subme(object):
 	ZIP_EXTENSIONS = ('zip',)
 	TMP = 'tmp'
 
-	def __init__(self, path_=None):
+	def __init__(self, path_=None, languages=None):
+		"""
+		`path_` can be either a directory or a single file.
+		`languages` must be a tuple for specific languages, None to search
+		with available languages. Language code must be a 2-letters code
+		according to the ISO 639-1 or a 3-letters code (ISO 639-2).
+		"""
 		self.path = path_
+		self.languages = languages
 
 	def start(self):
 		if not exists(self.path):
@@ -112,6 +119,10 @@ class Subme(object):
 		move(subpath, _subpath)
 
 	def search(self, video):
+		"""
+		Language filtering is done here to avoid as much restriciton as
+		possible from the plugins. Not a big operation anyway.
+		"""
 		subs = []
 		for plugin in self.PLUGINS:
 			try:
@@ -121,6 +132,8 @@ class Subme(object):
 				)(video)
 			except NoSubsError:
 				pass
+		if self.languages:
+			subs = [s for s in subs if s['language'] in self.languages]
 		return sorted(subs, key=lambda k: k['rating'], reverse=True)
 
 	def teardown(self):
@@ -130,7 +143,9 @@ class Subme(object):
 
 
 if __name__ == '__main__':
-	subme = Subme()
+	LANGUAGES = ('eng', 'fra', 'fre', 'en', 'fr')
+
+	subme = Subme(languages=LANGUAGES)
 
 	while True:
 		print("\n\n")
