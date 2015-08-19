@@ -67,6 +67,7 @@ class Subme(object):
 			self.subfile(join(directory, f))
 
 	def subfile(self, video):
+		logger.info("Searching subtitles for %s...", video)
 		subs = self.search(video)
 		subpath = None
 		for sub in subs:
@@ -75,11 +76,12 @@ class Subme(object):
 				subpath = self._extract(subpath)
 				subpath = self._move(subpath, video)
 			except (DownloadError, ExtractError, MoveError) as e:
-				logger.info(e)
+				logger.error(e)
 			else:
+				logger.info("Found subtitles for %s...", video)
 				break
 		else:
-			raise SubError
+			logger.error("No subtitles found for %s...", video)
 
 	def _download(self, suburl):
 		request = urlopen(Request(suburl))
